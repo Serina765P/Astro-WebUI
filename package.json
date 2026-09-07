@@ -1,0 +1,14 @@
+{
+  "name": "astro-webui",
+  "version": "0.1.0",
+  "description": "astro-blog 本地编辑工作台：文章、说说、中英 URI 对照、站点信息与友链",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "marked": "^16.4.2",
+    "yaml": "^2.9.0"
+  }
+}
