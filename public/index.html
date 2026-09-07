@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Astro-WebUI 工作台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-title">
+      <h1>Astro-WebUI</h1>
+      <p class="top-sub">astro-blog 本地编辑工作台</p>
+    </div>
+    <div class="top-meta">
+      <span id="blog-root" class="mono chip-data" title="工作台读写的博客目录"></span>
+      <span class="clock" title="博客渲染统一 Asia/Shanghai，这里的日期都按北京时间折算">
+        <span class="clock-label">北京时间</span>
+        <span id="clock" class="mono"></span>
+      </span>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="工作台分区">
+    <button class="tab is-active" data-tab="posts" role="tab" aria-selected="true">文章</button>
+    <button class="tab" data-tab="shuoshuo" role="tab" aria-selected="false">说说</button>
+    <button class="tab" data-tab="taxonomy" role="tab" aria-selected="false">URI 对照</button>
+    <button class="tab" data-tab="site" role="tab" aria-selected="false">站点信息</button>
+  </nav>
+
+  <main>
+    <!-- ============ 文章 ============ -->
+    <section id="tab-posts" class="panel is-active" role="tabpanel">
+      <div class="posts-layout">
+        <aside class="list-col">
+          <div class="list-tools">
+            <input id="post-search" type="search" placeholder="搜索标题…">
+            <select id="filter-category"><option value="">全部分类</option></select>
+            <select id="filter-tag"><option value="">全部标签</option></select>
+          </div>
+          <ul id="post-list" class="post-list"></ul>
+          <button id="btn-new-post" class="btn btn-primary btn-block">新建文章</button>
+        </aside>
+
+        <div class="editor-col">
+          <div id="editor-empty" class="empty">从左侧选择一篇文章，或新建一篇。<br><small>保存只写入本地文件，发布仍由你手动 commit + push。</small></div>
+          <div id="editor" hidden>
+            <div class="editor-head">
+              <h2 id="editor-slug" class="mono chip-data"></h2>
+              <span id="dirty-dot" class="dirty-dot" hidden title="有未保存的修改">● 未保存</span>
+              <div class="editor-actions">
+                <button id="btn-save-post" class="btn btn-primary">保存</button>
+                <button id="btn-delete-post" class="btn btn-danger">删除</button>
+              </div>
+            </div>
+            <div class="fm-grid">
+              <label class="field field-wide">标题
+                <input id="f-title" type="text">
+              </label>
+              <label class="field">日期（北京时间）
+                <input id="f-date" type="datetime-local">
+              </label>
+              <label class="field">皮肤
+                <select id="f-skin">
+                  <option value="">（无）</option>
+                  <option value="imas-album">imas-album</option>
+                </select>
+              </label>
+              <label class="field field-check">
+                <input id="f-updated-on" type="checkbox"> 有更新时间
+              </label>
+              <label class="field" id="f-updated-field" hidden>更新时间
+                <input id="f-updated" type="datetime-local">
+              </label>
+              <label class="field field-wide">描述
+                <textarea id="f-description" rows="2"></textarea>
+              </label>
+              <label class="field field-wide">关键词（逗号分隔）
+                <input id="f-keywords" type="text">
+              </label>
+              <div class="field field-wide">分类
+                <div id="f-categories" class="chips" data-kind="categories">
+                  <input type="text" list="dl-categories" placeholder="输入后回车添加">
+                </div>
+              </div>
+              <div class="field field-wide">标签
+                <div id="f-tags" class="chips" data-kind="tags">
+                  <input type="text" list="dl-tags" placeholder="输入后回车添加">
+                </div>
+              </div>
+            </div>
+            <div class="body-split">
+              <textarea id="f-body" spellcheck="false" placeholder="Markdown 正文…（随文图片放 src/content/posts/&lt;slug&gt;/ 下，正文相对引用）"></textarea>
+              <div id="preview" class="preview" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 说说 ============ -->
+    <section id="tab-shuoshuo" class="panel" role="tabpanel" hidden>
+      <div class="ss-composer card">
+        <div class="composer-row">
+          <input id="ss-title" type="text" placeholder="标题（可留空）">
+          <input id="ss-time" type="datetime-local" title="发布时间，留空按当前时间">
+          <button id="ss-send" class="btn btn-primary">发一条</button>
+        </div>
+        <textarea id="ss-content" rows="3" placeholder="说点什么…"></textarea>
+      </div>
+      <ul id="ss-list" class="ss-list"></ul>
+    </section>
+
+    <!-- ============ URI 对照 ============ -->
+    <section id="tab-taxonomy" class="panel" role="tabpanel" hidden>
+      <div id="unmapped-banner" class="banner" hidden></div>
+      <div class="tax-grid">
+        <div class="card">
+          <h2>分类 → slug</h2>
+          <table class="map-table">
+            <thead><tr><th>名称</th><th>slug</th><th></th></tr></thead>
+            <tbody id="rows-categorySlugs"></tbody>
+          </table>
+          <button class="btn btn-ghost add-row" data-table="categorySlugs">+ 添加映射</button>
+        </div>
+        <div class="card">
+          <h2>标签 → slug</h2>
+          <table class="map-table">
+            <thead><tr><th>名称</th><th>slug</th><th></th></tr></thead>
+            <tbody id="rows-tagSlugs"></tbody>
+          </table>
+          <button class="btn btn-ghost add-row" data-table="tagSlugs">+ 添加映射</button>
+        </div>
+        <div class="card">
+          <h2>分类配色（莫兰迪 CSS 变量）</h2>
+          <table class="map-table">
+            <thead><tr><th>分类</th><th>CSS 变量</th><th></th></tr></thead>
+            <tbody id="rows-categoryColors"></tbody>
+          </table>
+          <button class="btn btn-ghost add-row" data-table="categoryColors">+ 添加配色</button>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button id="btn-save-taxonomy" class="btn btn-primary">保存映射表</button>
+      </div>
+    </section>
+
+    <!-- ============ 站点信息 ============ -->
+    <section id="tab-site" class="panel" role="tabpanel" hidden>
+      <div class="card">
+        <h2>侧栏简介</h2>
+        <textarea id="site-description" rows="3"></textarea>
+      </div>
+      <div class="card">
+        <h2>社交链接</h2>
+        <table class="map-table">
+          <thead><tr><th>名称</th><th>图标</th><th>链接</th><th></th></tr></thead>
+          <tbody id="rows-social"></tbody>
+        </table>
+        <button id="btn-add-social" class="btn btn-ghost">+ 添加社交链接</button>
+      </div>
+      <div class="card">
+        <h2>友链</h2>
+        <table class="map-table">
+          <thead><tr><th>名称</th><th>链接</th><th>头像</th><th>描述</th><th></th></tr></thead>
+          <tbody id="rows-friendLinks"></tbody>
+        </table>
+        <button id="btn-add-friend" class="btn btn-ghost">+ 添加友链</button>
+      </div>
+      <div class="save-bar">
+        <button id="btn-save-site" class="btn btn-primary">保存站点信息</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="new-post-dialog">
+    <form id="new-post-form" novalidate>
+      <h2>新建文章</h2>
+      <label class="field">slug（即文件名，仅限 ASCII 字母/数字/连字符/下划线）
+        <input id="np-slug" type="text" placeholder="如 gakumas-cd-review" autocomplete="off" required>
+      </label>
+      <p id="np-hint" class="hint"></p>
+      <label class="field">标题（可留空，默认用 slug）
+        <input id="np-title" type="text" autocomplete="off">
+      </label>
+      <menu class="dialog-menu">
+        <button type="button" id="np-cancel" class="btn">取消</button>
+        <button type="submit" id="np-create" class="btn btn-primary" disabled>创建</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <datalist id="dl-tags"></datalist>
+  <datalist id="dl-categories"></datalist>
+
+  <script src="/vendor/marked.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -30,6 +30,9 @@ function addRoute(method, pathname, handler) {
 
 [postsRoutes, shuoshuoRoutes, taxonomyRoutes, siteRoutes].forEach((reg) => reg(addRoute));
 
+// 只读状态：界面头部展示博客根路径，避免 BLOG_ROOT 指错目录还浑然不觉
+addRoute('GET', '/api/status', (ctx) => ctx.json(200, { blogRoot: BLOG_ROOT, port: PORT }));
+
 async function handleApi(req, res, pathname) {
   for (const r of routes) {
     if (r.method !== req.method) continue;
