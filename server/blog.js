@@ -14,12 +14,14 @@ export const BLOG_ROOT = path.resolve(
 );
 
 const POSTS_DIR = path.join(BLOG_ROOT, 'src', 'content', 'posts');
+const SHUOSHUO_DIR = path.join(BLOG_ROOT, 'src', 'data', 'shuoshuo');
 
 export const paths = {
   postsDir: () => POSTS_DIR,
   postFile: (slug) => path.join(POSTS_DIR, `${slug}.md`),
   assetDir: (slug) => path.join(POSTS_DIR, slug),
-  shuoshuo: () => path.join(BLOG_ROOT, 'src', 'data', 'shuoshuo.json'),
+  shuoshuoDir: () => SHUOSHUO_DIR,
+  shuoshuoShard: (year) => path.join(SHUOSHUO_DIR, `${year}.json`),
   taxonomy: () => path.join(BLOG_ROOT, 'src', 'data', 'taxonomy.json'),
   siteInfo: () => path.join(BLOG_ROOT, 'src', 'data', 'site-info.json'),
 };

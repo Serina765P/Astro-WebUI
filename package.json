@@ -5,7 +5,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "test": "node server/routes/shuoshuo.test.mjs"
   },
   "dependencies": {
     "marked": "^16.4.2",

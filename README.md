@@ -19,7 +19,7 @@ BLOG_ROOT=D:\path\to\astro-blog npm start
 | Tab | 说明 |
 | --- | --- |
 | **文章** | 列表（搜索 + 分类/标签筛选）、编辑 frontmatter 与正文（marked 即时预览）、新建（slug 实时校验 ASCII）、删除（同名资源文件夹提示保留） |
-| **说说** | 发一条（新条目置顶）、行内编辑 content/title/published_at、删除；信封与 `worker/` 邮件拉取契约一致（`type: 'MAIL'`、本地 id 用 `local_<时间戳>`） |
+| **说说** | 发一条（新条目置顶）、行内编辑 content/title/published_at、删除；按上海时区写入 `src/data/shuoshuo/<年份>.json`，跨年编辑自动迁移分片；信封与 `worker/` 邮件拉取契约一致（`type: 'MAIL'`、本地 id 用 `local_<时间戳>`） |
 | **URI 对照** | 分类/标签两张 slug 映射表 + 分类配色；顶部横幅列出「正在使用但缺映射」的名称，一键补录 —— 缺了映射 URL 会退化成中文 |
 | **站点信息** | 侧栏简介、社交链接、友链 CRUD |
 
@@ -39,7 +39,7 @@ BLOG_ROOT=D:\path\to\astro-blog npm start
 | `GET /api/posts` | 全部文章摘要，按日期倒序 |
 | `GET/PUT/DELETE /api/posts/:slug` | 读 / 写（保留未知 frontmatter 字段）/ 删单篇 |
 | `POST /api/posts` | 新建，slug 冲突 409 |
-| `GET/POST /api/shuoshuo` · `PUT/DELETE /api/shuoshuo/:id` | 说说 CRUD，`fetched_at`/`count` 自动维护 |
+| `GET/POST /api/shuoshuo` · `PUT/DELETE /api/shuoshuo/:id` | 说说 CRUD；按上海年份分片读写，GET 聚合返回 `{ source, fetched_at, count, items }` |
 | `GET/PUT /api/taxonomy` | 三张映射表读写 |
 | `GET /api/taxonomy/unmapped` | 扫描全部文章，列出缺映射的分类/标签 |
 | `GET/PUT /api/site` | 侧栏简介 / 社交 / 友链 |
@@ -48,9 +48,11 @@ BLOG_ROOT=D:\path\to\astro-blog npm start
 
 ## 已知行为
 
-- 通过工作台保存 `site-info.json` / `taxonomy.json` / `shuoshuo.json` 时会以 2 空格缩进重排 JSON（语义不变，格式归一）。
+- 通过工作台保存 `site-info.json` / `taxonomy.json` / `src/data/shuoshuo/<年份>.json` 时会以 2 空格缩进重排 JSON（语义不变，格式归一）。
 - 编辑文章保留 frontmatter 里的未知字段（对齐 zod schema 的宽松策略）。
 - 不做图片上传：随文图片仍手动放 `src/content/posts/<slug>/`，正文相对引用 `![说明](<slug>/文件名.webp)`（新建文章的正文模板里有提示注释）。
+
+运行 `npm test` 可验证空分片、跨年新增、跨年编辑迁移、删除、计数重算与 ID 唯一性。
 
 ## 技术栈
 

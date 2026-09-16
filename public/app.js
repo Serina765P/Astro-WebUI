@@ -491,7 +491,7 @@ function shuoshuoItem(item) {
     } catch (err) { toast(err.message, true); }
   });
   del.addEventListener('click', async () => {
-    if (!confirm(`确定删除这条说说（${item.id}）？shuoshuo.json 里的条目会被移除。`)) return;
+    if (!confirm(`确定删除这条说说（${item.id}）？对应年份分片里的条目会被移除。`)) return;
     try {
       await api('DELETE', `/api/shuoshuo/${encodeURIComponent(item.id)}`);
       toast('已删除');
@@ -530,7 +530,7 @@ function setupShuoshuo() {
       $('#ss-title').value = '';
       $('#ss-time').value = '';
       $('#ss-content').value = '';
-      toast('已写入 shuoshuo.json（新条目在最上面）');
+      toast('已写入对应年份分片（新条目在最上面）');
       await loadShuoshuo();
     } catch (err) { toast(err.message, true); }
   });
